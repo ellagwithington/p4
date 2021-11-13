@@ -1,0 +1,7 @@
+<ACCOUNTS>
+	<CUSTOMER>
+		<id>12</id>
+		<Username>client</Username>
+		<Password>clientpass</Password>
+		<Profile>This is client</Profile>
+	</CUSTOMER>
