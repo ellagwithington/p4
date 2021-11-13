@@ -6,9 +6,9 @@ import java.util.*;
 public class InventoryReader {
     static HashMap<String, String> data = new HashMap<String, String>();
 public static void main(String[] args) {
-readFile("inventory.xml");
 }
 public static HashMap<String,String> readFile(String filename){
+	System.out.println(filename);
     File dataFile = new File(filename);
     if ( ! dataFile.exists() ) {
         System.out.println("No data file found.");
@@ -22,10 +22,12 @@ public static HashMap<String,String> readFile(String filename){
             input = input.substring(separatorPosition + 1, separatorPosition2);
             if(input.equals("stockNumber")){
                 String value = scanner.nextLine();
+                value = value.trim();
                 data.put("stockNumber", value);
             }
             if(input.equals("description")){
                 String value = scanner.nextLine();
+                value = value.trim();
                 data.put("description", value);
             }
         }
@@ -41,4 +43,5 @@ public static HashMap<String,String> readFile(String filename){
     return data;
 }
 }
+
 
