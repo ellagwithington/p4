@@ -1,8 +1,6 @@
 //Program by Ella Withington 
 import java.util.HashMap;
-import java.net.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.*;
 
 public class InventoryReader {
@@ -10,7 +8,7 @@ public class InventoryReader {
 public static void main(String[] args) {
 readFile("inventory.xml");
 }
-public static void readFile(String filename){
+public static HashMap<String,String> readFile(String filename){
     File dataFile = new File(filename);
     if ( ! dataFile.exists() ) {
         System.out.println("No data file found.");
@@ -40,5 +38,7 @@ public static void readFile(String filename){
         System.out.print("Key = " + key + ", ");
         System.out.println("Data = " + data.get(key));
         }
+    return data;
 }
 }
+
