@@ -55,7 +55,7 @@ public class CustomerChat extends Application {
     /**
      * Control buttons that appear in the window.
      */
-    private Button  closeButton, 
+    private Button listenButton, connectButton, closeButton, 
                    clearButton, quitButton, saveButton, sendButton;
     /**
      * Input boxes for connection information (port numbers and host names).
@@ -82,8 +82,12 @@ public class CustomerChat extends Application {
      * Set up the GUI and event handling.
      */
     public void start(Stage stage) {
-        connection = new ConnectionHandler(defaultHost, defaultPort);
         window = stage;
+        
+        listenButton = new Button("Listen on port:");
+        listenButton.setOnAction( this::doAction );
+        connectButton = new Button("Connect to:");
+        connectButton.setOnAction( this::doAction );
         closeButton = new Button("Disconnect");
         closeButton.setOnAction( this::doAction );
         closeButton.setDisable(true);
@@ -115,6 +119,12 @@ public class CustomerChat extends Application {
         HBox buttonBar = new HBox(5, quitButton, saveButton, clearButton, 
 closeButton);
         buttonBar.setAlignment(Pos.CENTER);
+        HBox connectBar = new HBox(5, listenButton, listeningPortInput, 
+connectButton, 
+                                      remoteHostInput, new Label("port:"), 
+remotePortInput);
+        connectBar.setAlignment(Pos.CENTER);
+        VBox topPane = new VBox(8, connectBar, buttonBar);
         BorderPane inputBar = new BorderPane(messageInput);
         inputBar.setLeft( new Label("Your Message:"));
         inputBar.setRight(sendButton);
@@ -124,16 +134,13 @@ closeButton);
         root.setTop(topPane);
         root.setBottom(inputBar);
         root.setStyle("-fx-border-color: #444; -fx-border-width: 3px");
-        inputBar.setStyle("-fx-padding:5px; -fx-border-color: #444; -fx-border-
-width: 3px 0 0 0");
-        topPane.setStyle("-fx-padding:5px; -fx-border-color: #444; -fx-border-
-width: 0 0 3px 0");
+        inputBar.setStyle("-fx-padding:5px; -fx-border-color: #444; -fx-border-width: 3px 0 0 0");
+        topPane.setStyle("-fx-padding:5px; -fx-border-color: #444; -fx-border-width: 0 0 3px 0");
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Two-user Networked Chat");
         stage.setOnHidden( e -> {
-               // If a connection exists when the window is closed, close the 
-connection.
+               // If a connection exists when the window is closed, close the connection.
             if (connection != null) 
                 connection.close(); 
         });
@@ -155,8 +162,46 @@ connection.
      */
     private void doAction(ActionEvent evt) {
         Object source = evt.getSource();
-      
-         if (source == closeButton) {
+        if (source == listenButton) {
+            if (connection == null || 
+                    connection.getConnectionState() == ConnectionState.CLOSED) {
+                String portString = listeningPortInput.getText();
+                int port;
+                try {
+                    port = Integer.parseInt(portString);
+                    if (port < 0 || port > 65535)
+                        throw new NumberFormatException();
+                }
+                catch (NumberFormatException e) {
+                    errorMessage(portString + "is not a legal port number.");
+                    return;
+                }
+                connectButton.setDisable(true);
+                listenButton.setDisable(true);
+                closeButton.setDisable(false);
+                connection = new ConnectionHandler(port);
+            }
+        }
+        else if (source == connectButton) {
+            if (connection == null || 
+                    connection.getConnectionState() == ConnectionState.CLOSED) {
+                String portString = remotePortInput.getText();
+                int port;
+                try {
+                    port = Integer.parseInt(portString);
+                    if (port < 0 || port > 65535)
+                        throw new NumberFormatException();
+                }
+                catch (NumberFormatException e) {
+                    errorMessage(portString +"is not a legal port number.");
+                    return;
+                }
+                connectButton.setDisable(true);
+                listenButton.setDisable(true);
+                connection = new ConnectionHandler(remoteHostInput.getText(),port);
+            }
+        }
+        else if (source == closeButton) {
             if (connection != null)
                 connection.close();
         }
@@ -200,20 +245,17 @@ connection.
             out = new PrintWriter( stream );
         }
         catch (Exception e) {
-            errorMessage("Sorry, but an error occurred while\ntrying to open the 
-file:\n" + e);
+            errorMessage("Sorry, but an error occurred while\ntrying to open the file:\n" + e);
             return;
         }
         try {
-            out.print(transcript.getText());  // Write text from the TextArea to 
-the file.
-            out.close();
+            out.print(transcript.getText());  // Write text from the TextArea to the file.
+        out.close();
             if (out.checkError())   // (need to check for errors in PrintWriter)
                 throw new IOException("Error check failed.");
         }
         catch (Exception e) {
-            errorMessage("Sorry, but an error occurred while\ntrying to write the 
-text:\n" + e);
+            errorMessage("Sorry, but an error occurred while\ntrying to write the text:\n" + e);
         }    
     }
     /**
@@ -266,8 +308,7 @@ text:\n" + e);
             state = ConnectionState.CONNECTING;
             this.remoteHost = remoteHost;
             this.port = port;
-            postMessage("\nCONNECTING TO " + remoteHost + " ON PORT " + port + "\
-n");
+            postMessage("\nCONNECTING TO " + remoteHost + " ON PORT " + port + "\n");
             try { setDaemon(true); }
             catch (Exception e) {}
             start();
@@ -366,6 +407,8 @@ InputStreamReader(socket.getInputStream()));
         private void cleanUp() {
             state = ConnectionState.CLOSED;
             Platform.runLater( () -> {
+                listenButton.setDisable(false);
+                connectButton.setDisable(false);
                 closeButton.setDisable(true);
                 sendButton.setDisable(true);
                 messageInput.setEditable(false);
