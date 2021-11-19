@@ -20,6 +20,7 @@ public class SettingsScene extends SceneBasic {
 	private TextField portField = new TextField("32007"); // FOR TESTING
 	private Button applyButton = new Button("Apply");
 	private Button cancelButton = new Button("Cancel");
+	private Button chatButton = new Button("Chat");
 	private Label errorMessage = new Label();
 
 	public SettingsScene() {
@@ -35,7 +36,7 @@ public class SettingsScene extends SceneBasic {
         gridPane.add(portText, 0,1);
         gridPane.add(portField, 1, 1);
         HBox buttonBox = new HBox();
-        buttonBox.getChildren().addAll(applyButton, cancelButton);
+        buttonBox.getChildren().addAll(applyButton, cancelButton, chatButton);
         gridPane.add(buttonBox, 1, 2);
         errorMessage.setTextFill(Color.RED);
         gridPane.add(errorMessage, 1, 3);
@@ -43,6 +44,7 @@ public class SettingsScene extends SceneBasic {
         root.getChildren().addAll(gridPane);
         applyButton.setOnAction(e -> apply());
         cancelButton.setOnAction(e -> cancel());
+		chatButton.setOnAction(e -> chat());
 	}
 	
 	private void apply() {
@@ -66,4 +68,10 @@ public class SettingsScene extends SceneBasic {
 		errorMessage.setText(""); // Clear any previous error messages
 		SceneManager.setLoginScene();
 	}
+
+	private void chat() {
+		errorMessage.setText(""); // Clear any previous error messages
+		//make sURE THIS IS RIGHT _________________________________
+		stage.setScene(customerChat.getScene());
+		
 }
