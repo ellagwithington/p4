@@ -72,6 +72,8 @@ public class SettingsScene extends SceneBasic {
 	private void chat() {
 		errorMessage.setText(""); // Clear any previous error messages
 		//make sURE THIS IS RIGHT _________________________________
-		stage.setScene(customerChat.getScene());
+		CustomerChat chat = new CustomerChat();
+		chat.start(new Stage());
 		
+	}
 }
