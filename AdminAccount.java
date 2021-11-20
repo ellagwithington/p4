@@ -5,18 +5,18 @@ import java.util.ArrayList;
  */
 
 /**
- * @author fietkiewicz
+ * @author ellawithington
  *
  */
 public class AdminAccount extends Account {
 	private ArrayList<Account> accounts;
 	
 	/**
+	 *@param id
 	 * @param username
 	 * @param password
 	 */
-	public AdminAccount(String username, String password, ArrayList<Account> accounts) {
-		super(username, password);
-		this.accounts = accounts;
+	public AdminAccount(int id, String username, String password) {
+		super(id, username, password);
 	}
 }
