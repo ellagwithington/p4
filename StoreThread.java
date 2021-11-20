@@ -199,8 +199,12 @@ public class StoreThread extends Thread {
 	}
 	
 	public void sendInventory(PrintWriter outgoing) {
-
-		
+	HashMap<String,String>data;
+		data = InventoryReader.readFile("inventory.xml");
+ for (String key : data.keySet()) {
+        outgoing.println(key);
+				outgoing.println(data.get(key));//description
+        	}	
 	}
 	
 	public void viewOrders(PrintWriter outgoing) {
