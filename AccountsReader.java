@@ -1,16 +1,20 @@
-//Author:Jack Peng
+//Author:Jack Peng & Ella Withington
 import java.util.HashMap;
 import java.io.*;
 import java.util.*;
 
 public class AccountsReader {
-		static HashMap<String, String> dataSet = new HashMap<String, String>();
+		static HashMap<String, Account> dataSet = new HashMap<String, Account>();
+		public static String username;
+		public static  String password;
+		public  static String id;
+		public  static String profile;
     
     	public static void main(String[] args) {
     		readFile("accounts.xml");
     	}
 
-    	public static HashMap<String,String> readFile(String filename){
+    	public static HashMap<String, Account> readFile(String filename){
     			File dataFile = new File(filename);
     			if ( ! dataFile.exists() ) {
     					System.out.println("No data file found.");
@@ -32,22 +36,22 @@ public class AccountsReader {
     							int separatorPosition5 = input1.indexOf('<',separatorPosition4+1);
     							input1 = input1.substring(separatorPosition3 + 1, separatorPosition4);
     							if(input1.equals("id")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("id", value);
+            						 id = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
+            						
             					}
             					else if(input1.equals("Username")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("Username", value);
+            						 username = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
             					}
             					else if(input1.equals("Password")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("Password", value);
+            						String password = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
             					}
             					else if(input1.equals("Profile")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("Profile", value);
+							 profile = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
+        
             					}
     						}
+						ClientAccount client = new ClientAccount(Integer.parseInt(id), username, password, profile);
+						dataSet.put(id, client);
     					}
     						else if(next.equals("ADMINISTRATOR")) {
     						String input1 = "";
@@ -59,18 +63,22 @@ public class AccountsReader {
     							int separatorPosition5 = input1.indexOf('<',separatorPosition4+1);
     							input1 = input1.substring(separatorPosition3 + 1, separatorPosition4);
     							if(input1.equals("id")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("id", value);
+            						 id = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
+            						
             					}
             					else if(input1.equals("Username")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("Username", value);
+            						 username = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
             					}
             					else if(input1.equals("Password")){
-            						String value = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
-            						dataSet.put("Password", value);
+            						 password = currentLine.substring(separatorPosition4 + 1, separatorPosition5);
+            						
             					}
+						
+						
+						
     						}
+						AdminAccount admin = new AdminAccount(Integer.parseInt(id), username, password);
+						dataSet.put(id, admin);
     					}
     						
     					
