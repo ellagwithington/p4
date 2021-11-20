@@ -41,10 +41,12 @@ public class SettingsScene extends SceneBasic {
         errorMessage.setTextFill(Color.RED);
         gridPane.add(errorMessage, 1, 3);
         gridPane.setAlignment(Pos.TOP_CENTER);
+		System.out.println("test1");
         root.getChildren().addAll(gridPane);
         applyButton.setOnAction(e -> apply());
         cancelButton.setOnAction(e -> cancel());
 		chatButton.setOnAction(e -> chat());
+		System.out.println("test1");
 	}
 	
 	private void apply() {
@@ -71,7 +73,6 @@ public class SettingsScene extends SceneBasic {
 
 	private void chat() {
 		errorMessage.setText(""); // Clear any previous error messages
-		//make sURE THIS IS RIGHT _________________________________
 		CustomerChat chat = new CustomerChat();
 		chat.start(new Stage());
 		
