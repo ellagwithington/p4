@@ -50,7 +50,7 @@ public class AccountsReader {
         
             					}
     						}
-						ClientAccount client = new ClientAccount(Integer.parseInt(id), username, password, profile);
+						CustomerAccount client = new CustomerAccount(Integer.parseInt(id), username, password, profile);
 						dataSet.put(id, client);
     					}
     						else if(next.equals("ADMINISTRATOR")) {
