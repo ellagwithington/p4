@@ -32,7 +32,7 @@ public class ProfileScene extends SceneBasic {
         clientButton.setMinWidth(WIDTH);
         root.getChildren().addAll(clientButton);
         root.getChildren().addAll(logoutButton);
-        clientButton.setOnAction(e -> SceneManager.setClientScene());
+        clientButton.setOnAction(e -> SceneManager.setCustomerScene());
         logoutButton.setOnAction(e -> logout());
 	}
 
