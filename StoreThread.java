@@ -1,4 +1,4 @@
-//Author: Jack P
+//Author: Jack P & Ella W
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
