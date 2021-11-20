@@ -5,6 +5,7 @@
 public abstract class Account {
 	private String username;
 	private String password;
+	private int id;
 
 	public String getUsername() {
 		return username;
