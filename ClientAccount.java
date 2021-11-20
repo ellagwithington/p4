@@ -11,8 +11,8 @@ public class ClientAccount extends Account {
 	 * @param username
 	 * @param password
 	 */
-	public ClientAccount(String username, String password, String profile) {
-		super(username, password);
+	public ClientAccount(int id, String username, String password, String profile) {
+		super(id, username, password);
 		this.profile = profile;
 	}
 
