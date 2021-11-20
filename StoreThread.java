@@ -48,6 +48,10 @@ public class StoreThread extends Thread {
 	                			System.out.println("Change password..."); // For debugging
 	                			changePassword(userAccount, incoming, outgoing);
 	                			break;
+					case "INVENTORY":
+	                			System.out.println("send Inventory..."); // For debugging
+	                			sendInventory(outgoing);
+	                			break;
 	                	}
 	                    request = incoming.readLine();
 	                    System.out.println("Request: " + request); // For debugging
