@@ -82,7 +82,7 @@ public class LoginScene extends SceneBasic {
             }
             else if (reply.equals("CLIENT")) {
             	errorMessage.setText("");
-            	SceneManager.setClientScene();
+            	SceneManager.setCustomerScene();
             }
             else
             	errorMessage.setText(reply);
