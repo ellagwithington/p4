@@ -14,6 +14,10 @@ public abstract class Account {
 		return password;
 	}
 	
+	public int getId(){
+		return id;
+	}
+	
 	public boolean verifyPassword(String password) {
 		return this.password.equals(password);
 	}
@@ -32,7 +36,8 @@ public abstract class Account {
 	 * @param username
 	 * @param password
 	 */
-	public Account(String username, String password) {
+	public Account(int id, String username, String password) {
+		this.id = id;
 		this.username = username;
 		this.password = password;
 	}
