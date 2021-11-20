@@ -7,12 +7,13 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class StoreThread extends Thread {
 	
 	private Socket client;
-	public ArrayList<Account> accounts = new ArrayList<Account>(); 
+	public HashMap<String,Account>accounts;
 	public Account userAccount;
     private BufferedReader incoming;
     private PrintWriter outgoing; 
@@ -22,7 +23,6 @@ public class StoreThread extends Thread {
 	}
 	
 	public void run() {
-	        readAccounts(accounts); 
 	        try {
 	                System.out.println("Connection from " + client.getInetAddress().toString() );
 	                incoming = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -63,97 +63,77 @@ public class StoreThread extends Thread {
 	        }
 
 	}
-	
-	public void readAccounts(ArrayList<Account>accounts) {
-		 File dataFile = new File("accounts.txt");
-	        if ( ! dataFile.exists() ) {
-	            System.out.println("No data file found.");
-	            System.exit(1);
-	        }
-	        try( Scanner scanner = new Scanner(dataFile) ) {
-	            while (scanner.hasNextLine()) {
-	                String accountEntry = scanner.nextLine();
-	                int separatorPosition = accountEntry.indexOf('%');
-	                int separatorPosition2 = accountEntry.indexOf('%', separatorPosition + 1);
-	                int separatorPosition3 = accountEntry.indexOf('%', separatorPosition2 + 1);
-	                if (separatorPosition == -1)
-	                    throw new IOException("File is not a valid data file.");
-	                String accountType = accountEntry.substring(0, separatorPosition);
-	                String username = accountEntry.substring(separatorPosition + 1, separatorPosition2);
-	                String password = accountEntry.substring(separatorPosition2 + 1, separatorPosition3);
-	                if (accountType.equals("admin"))
-	                	accounts.add(new AdminAccount(username, password, accounts));
-	                else {
-	                    String profile = accountEntry.substring(separatorPosition3 + 1);
-	                	accounts.add(new ClientAccount(username, password, profile));
-	            	}
-	            }
-	        }
-	        catch (IOException e) {
-	            System.out.println("Error in data file.");
-	            System.exit(1);
-	        }
-	}
-	
-	public void login(ArrayList<Account>accounts,
+
+	public void login(HashMap<String,Account>accounts,
 			BufferedReader incoming, PrintWriter outgoing) {
+			accounts  = AccountsReader.readFile("accounts.xml");
 		 try {
 	            String username = incoming.readLine();
 	            String password = incoming.readLine();
 	            System.out.println("Received: " + username + ", " + password);
 	            Account account;
 	            String reply = "";
+	            String id ;
 	    		boolean foundUser = false;
-	    		for (int i = 0; i < accounts.size(); i++) {
-	    			if (accounts.get(i).getUsername().equals(username)) {
-	    				foundUser = true;
-	    				if (accounts.get(i).verifyPassword(password)) {
-	    					account = accounts.get(i);
-	    					if (account instanceof AdminAccount) {
-	        	    			reply = "ADMIN";
-	        	                System.out.println("Found admin account");
-	    					}
-	    					else {
-	        	    			reply = "CLIENT";
-	        	                System.out.println("Found client account");
-	    					}
-	    					userAccount = account; // Set current user
-	    				}
-	    				else {
-	    					reply = "ERROR: Invalid password";
-	    				}
+	    		for(int i = 0; i < 100;i++) { // assume biggest ID 100
+	    			id = i+"";
+	    			if(accounts.containsKey(id)) {
+	    				 if(accounts.get(id).getUsername().equals(username)) {
+	    					 foundUser = true;
+	    					 if(accounts.get(id).verifyPassword(password)) {
+	    						 account = accounts.get(id);
+	    						 if (account instanceof AdminAccount) {
+	 	        	    			reply = "ADMIN";
+	 	        	                System.out.println("Found admin account");
+	 	    					}
+	    						 else {
+	 	        	    			reply = "CUSTOMER";
+	 	        	                System.out.println("Found Customer account");
+	 	    					}
+	 	    					userAccount = account; // Set current user
+	    					 }
+	    					 else {
+	 	    					reply = "ERROR: Invalid password";
+	 	    				 }
+	    				 }
 	    			}
-	    		}
-	    		if (!foundUser)
-	    			reply = "ERROR: Invalid username";
-	            System.out.println("Sending reply...");
-	            outgoing.println(reply);
-	            outgoing.flush();  // Make sure the data is actually sent!
-	        }
+	    			if (!foundUser)
+		    			reply = "ERROR: Invalid username";
+		            System.out.println("Sending reply...");
+		            outgoing.println(reply);
+		            outgoing.flush();  // Make sure the data is actually sent!
+		        }
+	    	}
+	    	
 	        catch (Exception e){
 	            System.out.println("Error: " + e);
 	        }
 	}
 	
 	public void sendAccountList(PrintWriter outgoing) {
-		for (int i = 0; i < accounts.size(); i++) {
-	        outgoing.println(accounts.get(i).getUsername());
-			if (accounts.get(i) instanceof AdminAccount)
-				outgoing.println("Administrator");
-			else
-				outgoing.println("Client");
+		String id;
+		for (int i = 0; i< 100; i++) {
+			id = i+"";
+			if(accounts.containsKey(id)) {
+	        	outgoing.println(accounts.get(id).getUsername());
+	        	if (accounts.get(id) instanceof AdminAccount)
+	        		outgoing.println("Administrator");
+	        	else
+	        		outgoing.println("Customer");
+			}
 		}
         outgoing.println("DONE");
         outgoing.flush();
 	}
 	
 	public void sendProfile(PrintWriter outgoing) {
-		outgoing.println(((ClientAccount) userAccount).getProfile());
+		outgoing.println(((CustomerAccount) userAccount).getProfile());
     	outgoing.flush();
 	}
 	
 	public void changePassword(Account userAccount,
 			BufferedReader incoming, PrintWriter outgoing) {
+		String id;
 		try {
     		String oldPassword = incoming.readLine();
     		String newPassword = incoming.readLine();
@@ -163,13 +143,28 @@ public class StoreThread extends Thread {
 				userAccount.setPassword(newPassword);
 				// Save new password
 		        try {
-		        	PrintWriter file = new PrintWriter("accounts.txt");
-		            for (int i = 0; i < accounts.size(); i++) {
-						if (accounts.get(i) instanceof AdminAccount)
-			            	file.println("admin" + "%" + accounts.get(i).getUsername() + "%" + accounts.get(i).getPassword() + "%");
-						else
-			            	file.println("client" + "%" + accounts.get(i).getUsername() + "%" + accounts.get(i).getPassword() + "%" + ((ClientAccount) accounts.get(i)).getProfile());
-					}
+		        	PrintWriter file = new PrintWriter("accounts.xml");
+		        	file.println("<ACCOUNTS>");
+		            for (int i = 0; i < 100; i++) {
+		            	id = i+"";
+		            	if(accounts.containsKey(id)) {
+		            		if (accounts.get(id) instanceof AdminAccount) {
+		            			file.println("<ADMINISTRATOR>");
+		            			file.println("  "+"<id>"+accounts.get(id).getID()+"</id>");
+		            			file.println("  "+"<Username>"+accounts.get(id).getUsername()+"</Username>");
+		            			file.println("  "+"<Password>"+accounts.get(id).getPassword()+"</Password>");
+		            			file.println("</ADMINISTRATOR>");
+		            		}
+		            		else {
+		            			file.println("<CUSTOMER>");
+		            			file.println("  "+"<id>"+accounts.get(id).getID()+"</id>");
+		            			file.println("  "+"<Username>"+accounts.get(id).getUsername()+"</Username>");
+		            			file.println("  "+"<Password>"+accounts.get(id).getPassword()+"</Password>");
+		            			file.println("  "+"<Profile>"+((CustomerAccount)accounts.get(id)).getProfile()+"</Profile>");
+		            			file.println("</CUSTOMER>");
+		            		}
+		            	}
+		            }
 		            file.close();
 		        }
 		        catch (IOException e) {
@@ -182,8 +177,8 @@ public class StoreThread extends Thread {
 					System.out.println("Found admin account");
 				}
 				else {
-					reply = "CLIENT";
-					System.out.println("Found client account");
+					reply = "CUSTOMER";
+					System.out.println("Found customer account");
 				}
 			}
 			else {
@@ -198,5 +193,28 @@ public class StoreThread extends Thread {
     	}
 	}
 	
-}
+	
+	public void getOrder(BufferedReader incoming) {
+		
+	}
+	
+	public void sendInventory(PrintWriter outgoing) {
 
+		
+	}
+	
+	public void viewOrders(PrintWriter outgoing) {
+		HashMap<String,String>data;
+		data = InventoryReader.readFile("inventory.xml");
+		String stocknumber;
+		for(int i = 0; i < 100;i++) {
+			stocknumber = i+"";
+			if(data.containsKey(stocknumber)) {
+				outgoing.println(stocknumber);
+				outgoing.println(data.get(stocknumber));//description
+				outgoing.flush();
+			}
+		}
+	}
+	
+}
