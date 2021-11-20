@@ -41,7 +41,7 @@ public class CustomerChat extends Application {
      * Default port number.  This is the initial content of input boxes in
      * the window that specify the port number for the connection. 
      */
-    private static String defaultPort = "1501";
+    private static int defaultPort = 1501;
     /**
      * Default host name.  This is the initial content of the input box that
      * specifies the name of the computer to which a connection request
@@ -83,11 +83,8 @@ public class CustomerChat extends Application {
      */
     public void start(Stage stage) {
         window = stage;
-        
-        listenButton = new Button("Listen on port:");
-        listenButton.setOnAction( this::doAction );
-        connectButton = new Button("Connect to:");
-        connectButton.setOnAction( this::doAction );
+        connection = new ConnectionHandler(defaultHost, defaultPort);
+    
         closeButton = new Button("Disconnect");
         closeButton.setOnAction( this::doAction );
         closeButton.setDisable(true);
@@ -109,22 +106,13 @@ public class CustomerChat extends Application {
         transcript.setPrefColumnCount(60);
         transcript.setWrapText(true);
         transcript.setEditable(false);
-        listeningPortInput = new TextField(defaultPort);
-        listeningPortInput.setPrefColumnCount(5);
-        remotePortInput = new TextField(defaultPort);
-        remotePortInput.setPrefColumnCount(5);
-        remoteHostInput = new TextField(defaultHost);
-        remoteHostInput.setPrefColumnCount(18);
+
         
         HBox buttonBar = new HBox(5, quitButton, saveButton, clearButton, 
 closeButton);
         buttonBar.setAlignment(Pos.CENTER);
-        HBox connectBar = new HBox(5, listenButton, listeningPortInput, 
-connectButton, 
-                                      remoteHostInput, new Label("port:"), 
-remotePortInput);
-        connectBar.setAlignment(Pos.CENTER);
-        VBox topPane = new VBox(8, connectBar, buttonBar);
+
+        VBox topPane = new VBox(8, buttonBar);
         BorderPane inputBar = new BorderPane(messageInput);
         inputBar.setLeft( new Label("Your Message:"));
         inputBar.setRight(sendButton);
@@ -162,46 +150,8 @@ remotePortInput);
      */
     private void doAction(ActionEvent evt) {
         Object source = evt.getSource();
-        if (source == listenButton) {
-            if (connection == null || 
-                    connection.getConnectionState() == ConnectionState.CLOSED) {
-                String portString = listeningPortInput.getText();
-                int port;
-                try {
-                    port = Integer.parseInt(portString);
-                    if (port < 0 || port > 65535)
-                        throw new NumberFormatException();
-                }
-                catch (NumberFormatException e) {
-                    errorMessage(portString + "is not a legal port number.");
-                    return;
-                }
-                connectButton.setDisable(true);
-                listenButton.setDisable(true);
-                closeButton.setDisable(false);
-                connection = new ConnectionHandler(port);
-            }
-        }
-        else if (source == connectButton) {
-            if (connection == null || 
-                    connection.getConnectionState() == ConnectionState.CLOSED) {
-                String portString = remotePortInput.getText();
-                int port;
-                try {
-                    port = Integer.parseInt(portString);
-                    if (port < 0 || port > 65535)
-                        throw new NumberFormatException();
-                }
-                catch (NumberFormatException e) {
-                    errorMessage(portString +"is not a legal port number.");
-                    return;
-                }
-                connectButton.setDisable(true);
-                listenButton.setDisable(true);
-                connection = new ConnectionHandler(remoteHostInput.getText(),port);
-            }
-        }
-        else if (source == closeButton) {
+       
+        if (source == closeButton) {
             if (connection != null)
                 connection.close();
         }
@@ -329,7 +279,7 @@ remotePortInput);
          */
         synchronized void send(String message) {
             if (state == ConnectionState.CONNECTED) {
-                postMessage("SEND:  " + message);
+                postMessage("You:  " + message);
                 out.println(message);
                 out.flush();
                 if (out.checkError()) {
@@ -366,7 +316,7 @@ remotePortInput);
          */
         synchronized private void received(String message) {
             if (state == ConnectionState.CONNECTED)
-                postMessage("RECEIVE:  " + message);
+                postMessage(message);
         }
         /**
          * This is called by the run() method when the connection has been
