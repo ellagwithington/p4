@@ -7,9 +7,8 @@ public class InventoryReader {
     static HashMap<String, String> data = new HashMap<String, String>();
 public static void main(String[] args) {
 }
-public static HashMap<String,String> readFile(String filename){
-	System.out.println(filename);
-    File dataFile = new File(filename);
+public static HashMap<String,String> readFile(){
+    File dataFile = new File("inventory.xml");
     if ( ! dataFile.exists() ) {
         System.out.println("No data file found.");
         System.exit(1);
@@ -36,12 +35,7 @@ public static HashMap<String,String> readFile(String filename){
         System.out.println("Error in data file.");
         System.exit(1);
     }
-    for (String key : data.keySet()) {
-        System.out.print("Key = " + key + ", ");
-        System.out.println("Data = " + data.get(key));
-        }
+   
     return data;
+    }
 }
-}
-
-
