@@ -2,23 +2,32 @@
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.*;
 import java.io.*;
 
 class AccountsReaderTest {
-	static HashMap<String, String> dataSet = new HashMap<String, String>();	
+	static HashMap<String, Account> dataSet = new HashMap<String,Account>();	
+	static ArrayList<Account>accounts = new ArrayList<Account>();
 	@Test
 	void test() {
+			AdminAccount adminTest = new AdminAccount(20,"admin","adminpass",accounts);
+			CustomerAccount customerTest = new CustomerAccount(12,"client","clientpass","This is client");
 			dataSet = AccountsReader.readFile("accounts.xml");
-			String id = dataSet.get("id");
-			String username = dataSet.get("Username");
-			String password = dataSet.get("Password");
-			String profile = dataSet.get("Profile");
-			assert id.equals("12");
-			assert username.equals("client");
-			assert password.equals("clientpass");
-			assert profile.equals("This is client");
+			accounts.add(adminTest);
+			accounts.add(customerTest);
+			
+			assert customerTest.getID().equals(dataSet.get("12").getID());
+			assert customerTest.getPassword().equals(dataSet.get("12").getPassword());
+			assert customerTest.getUsername().equals(dataSet.get("12").getUsername());
+			assert customerTest.getProfile().equals(((CustomerAccount)dataSet.get("12")).getProfile());
+			
+			assert adminTest.getID().equals(dataSet.get("20").getID());
+			assert adminTest.getPassword().equals(dataSet.get("20").getPassword());
+			assert adminTest.getUsername().equals(dataSet.get("20").getUsername());
+		
 			
 	}
 }
