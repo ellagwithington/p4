@@ -15,7 +15,7 @@ public abstract class Account {
 		return password;
 	}
 	
-	public int getId(){
+	public int getID(){
 		return id;
 	}
 	
